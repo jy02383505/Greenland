@@ -1,0 +1,83 @@
+{% extends body.html %}
+{% block body %}
+
+    <div class="text-center">
+        <h3>限速公共参数配置页面</h3>
+    </div>
+    <div class="container">
+		
+	<div id="myModal1_c" class="modal hide fade" tabindex="-1" data-width="760">
+    	<div class="modal-header">
+        	<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+            	<h3>公共参数修改表单</h3>
+    	</div>
+    	<div class="modal-body">
+			<form id="demo-form2"  action="#" class="form-horizontal">
+					<div class="item form-group" style="position:relative;margin-bottom:5px;left:-80px;">
+	                     <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">参数C1<span class="required">*&nbsp;</span></label>
+	                        <div class="col-md-8 col-sm-8 col-xs-12" >
+	                        	<input id="limiter_c1" class="form-control col-md-7 col-xs-12" data-validate-length-range="6" data-validate-words="2"   type="text">
+	                        </div>
+                   </div>
+					<div class="item form-group" style="position:relative;margin-bottom:5px;left:-80px;">
+                         <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">参数C2<span class="required">*&nbsp;</span></label>
+                            <div class="col-md-8 col-sm-8 col-xs-12" >
+                                <input id="limiter_c2" class="form-control col-md-7 col-xs-12" data-validate-length-range="6" data-validate-words="2"   type="text">
+                            </div>
+                   </div>
+					<div class="item form-group" style="position:relative;margin-bottom:5px;left:-80px;">
+                         <label class="control-label col-md-3 col-sm-3 col-xs-12" for="name">参数TTL<span class="required">*&nbsp;</span></label>
+                            <div class="col-md-8 col-sm-8 col-xs-12" >
+                                <input id="limiter_ttl" class="form-control col-md-7 col-xs-12" data-validate-length-range="6" data-validate-words="2"   type="text">
+                            </div>
+                   </div>
+          		  <div class="modal-footer form-actions">
+				        <button id="limiter_public_conf" class="btn btn-danger" data-dismiss="modal" aria-hidden="true">确定</button>
+				        <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true">取消</button>
+				  </div>
+           </form>
+    	</div>
+	</div>
+
+		<h1></h1>
+		{% for conf in all_conf %}
+			<input type="hidden" id="public_conf_id" value={{conf['_id']}}></input>
+		{%end%}
+		<table class="table table-striped">
+    		<tr>
+        		<th style="width: 200px;"><center>C1</center></th>
+       	 		<th style="width: 200px;"><center>C2</center></th>
+        		<th style="width: 200px;" ><center>TTL</center></th>
+				<th style="width: 200px;"><center>更改配置</center></th>
+     		</tr>
+      		{% for conf in all_conf %}
+				<tr>
+					<td><center>{{conf['C1']}}</center> </td>
+					<td><center>{{conf['C2']}}</center> </td>
+					<td><center>{{conf['TTL']}}</center> </td>
+					<td><center><a href="#myModal1_c" role="button" class="btn btn-primary" data-toggle="modal">更改</a></center> </td>
+				</tr>
+			{% end %}
+		</table>
+	</div>
+	<script type="text/javascript">
+		$("#limiter_public_conf").click(function(){
+			var limiter_c1=$("#limiter_c1").val();	
+			var limiter_c2=$("#limiter_c2").val();
+			var limiter_ttl=$("#limiter_ttl").val();
+			var limiter_id = $("#public_conf_id").val();
+			alert(limiter_id);
+			$.ajax({
+        		type:"POST",
+        		url:"/limiter_public_conf/change",
+        		data:{limiter_c1:limiter_c1,limiter_c2:limiter_c2,limiter_ttl:limiter_ttl,limiter_id:limiter_id},
+        		dataType:"json",
+        		asyn:"false",
+        		success: function(data) {
+				
+				}
+			});
+		
+		});
+	</script>
+{% end %}

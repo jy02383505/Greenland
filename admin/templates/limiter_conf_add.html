@@ -1,0 +1,263 @@
+{% extends body.html %}
+{% block body %}
+
+    <div class="text-center">
+        <h3>限速配置添加</h3>
+    </div>
+    <div class="container">
+		
+		<div id="myModal1" class="modal hide fade" tabindex="-1" data-width="760">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+					<h3>自定义方向表单</h3>
+			</div>
+			<div class="modal-body">
+				<div class="row-fluid">
+					<div class="span6">
+						<h4>边缘设备带宽方向说明</h4>
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img alt src="{{ static_url('img/edge_devs.jpg') }}" />
+							<div class="control-group">
+								<div class="controls">
+									&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" value="e1" name='direction' />  1
+									<input type="checkbox" value="e2" name="direction" />  2
+									<input type="checkbox" value="e3" name="direction" />  3
+									<input type="checkbox" value="e4" checked="checked"  name="direction" />  4(默认选择)
+								</div>
+							</div>						
+					</div>
+					<div class="span6">
+						<h4>上层设备带宽方向说明</h4>
+						<div class="control-group">
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img alt src="{{ static_url('img/upper_devs.jpg') }}" />
+							<div class="controls">
+								&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" value="in" name="direction" />  in
+								<input type="checkbox" value="out" name="direction" />  out
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" data-dismiss="modal" class="btn">关闭</button>
+					<button type="button" data-dismiss="modal"  class="btn btn-primary" id="put_directions" >提交</button>
+				</div>
+			</div>
+		</div>
+        <form class="form-inline" action="/limiter_conf/add" method="post" id="limiter_conf_add">
+		<input type="hidden" name="hidden_direction" id ="hidden_direction" ></input>
+        <table class="table table-striped">
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:40%">计费模式:</th>
+				<td style="width:50%;padding-left:5px;"><input type="textarea" placeholder="请在右侧选择方向" id="input_direction"></input>
+					<input type="button" class="btn btn-success" id="fourth_direction" value="边缘4方向"></input>
+					<input type="button" class="btn btn-success" id="four_direction" value="边缘4个方向"></input>
+					<input type="button" class="btn btn-success" id="eight_direction" value="全部方向"></input>
+					<a href="#myModal1" role="button" class="btn btn-primary" data-toggle="modal">自定义</a>
+				</td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">用户名:</th>
+                <td style="width:50%;padding-left:5px;"><input name='user' type="textarea" onblur="check(this)"></input></td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">频道名:</th>
+                <td style="width:80%;padding-left:5px;">
+                    <div id="c_box"></div>
+                </td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">数量:</th>
+                <td style="width:50%;padding-left:5px;"><input type="textarea" name="num"></input> 单位:Gb(0~500)</td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%"><font size="4" >&nbsp;&nbsp;&nbsp;参数设置</font></th>
+                <td style="width:50%;padding-left:5px;"></td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">限速基数值Bbase:</th>
+                <td style="width:50%;padding-left:5px;"><input type="textarea" id="bbase" name="bbase"></input> 单位:kb/s</td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">警戒值Balarm参数:</th>
+                <td style="width:50%;padding-left:5px;"><input type="textarea" id="balarm" name="balarm"></input></td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">阈值Bhard参数:</th>
+                <td style="width:50%;padding-left:5px;"><input type="textarea" id="bhard" name="bhard"></input></td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">梯度值Bgrade:</th>
+                <td style="width:50%;padding-left:4px;">
+                    <select name="bgrade">
+                        <option value='1'>1</option>
+                        <option value='2'>2</option>
+                        <option value='3'>3</option>
+                        <option value='4'>4</option>
+                        <option value='5'>5</option>
+                        <option value='6'>6</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">报警值Bpolice参数:</th>
+                <td style="width:10%;padding-left:5px;"><input type="textarea" id="bpolice" name="bpolice"></input></td>
+            </tr>
+            <tr>
+                <td style="text-align:right;padding-right:60px;width:50%">
+                    &nbsp;
+                </td>
+                <td style="width:50%">
+                    <button type="submit" class="btn btn-primary" onsubmit="return validate_form(this)" >保存</button>
+                </td>
+            </tr>
+        </table>
+        </form>
+		
+     </div>
+    <script type="text/javascript">
+        $(document).ready(function(){
+           $("#bbase").val('170');
+           $("#balarm").val('0.75');
+           $("#bhard").val('1');
+           $("#bgrade").val('1');
+           $("#bpolice").val('1.2');
+        });
+	   $("#put_directions").click(function(){
+			var all_direction = "";
+			$('input[name="direction"]:checked').each(function(){ 
+				all_direction = all_direction + $(this).val()+','; 
+			});
+			if(all_direction.length>0){
+				all_direction=all_direction.substring(0,all_direction.length-1)
+				$("#hidden_direction").val(all_direction);
+				directions_result = select_directions(all_direction);
+				$("#input_direction").val(directions_result);
+			}else{
+				alert("您没有选择任何方向，请重新选择!");
+			}
+		});
+	   function select_directions(all_direction){
+			all_directions = all_direction.split(",");
+			var str1="边缘";
+			var str2="上层";
+			var flag="00";
+			for(i=0;i<all_directions.length;i++){
+				if(	all_directions[i].substring(0,1)=='e'){
+					str1 = str1+all_directions[i].substring(1,2)+",";
+					if(flag=="01" || flag=='11'){
+						flag="11";
+					}else{
+						flag1="10";
+					}
+				}else if(all_directions[i]=='in'){
+					str2 = str2+all_directions[i]+",";
+					if(flag=="10" || flag=='11'){
+                        flag="11";
+                    }else{
+                        flag1="01";
+                    }
+				}else{
+					str2 = str2+all_directions[i]+",";
+					if(flag=="10" || flag=='11'){
+                        flag="11";
+                    }else{
+                        flag1="01";
+                    }
+
+				}
+			}
+			if(flag1=="10"){
+				return str1.substring(0,str1.length-1);
+			}else if(flag=="01"){
+				return str2.substring(0,str1.length-1);
+			}else{
+				return str1.substring(0,str1.length-1)+"方向,"+str2.substring(0,str2.length-1)+"方向"
+			}
+		}
+	   $("#fourth_direction").click(function(){
+			$("#input_direction").val("边缘4方向");
+			$("#hidden_direction").val("e4");
+       });
+	   $("#four_direction").click(function(){
+			$("#input_direction").val("边缘4个方向");
+			$("#hidden_direction").val("e1,e2,e3,e4");
+       });
+	   $("#eight_direction").click(function(){
+				$("#input_direction").val("全部方向");
+			$("#hidden_direction").val("e1,e2,e3,e4,in,out");
+       });
+       function trim(s){
+           return s.replace(/(^\s*)|(\s*$)/g, "");
+        }
+	   function check_direction(t){
+			direction_value = trim(t.value);
+			if(direction_value == 'make'){
+				alert(1);
+			}
+		}
+       function check(t){
+           last_value = trim(t.value)
+           if(last_value==''){
+               console.log('no value')
+           }else{
+               $.post("/check/user/rcms",{user:last_value, conf_type:'limiter'},function(result){
+                   if(result.code == '1'){
+                       alert('---用户名错误or用户名下无任务频道---')
+                   }else if(result.code == '2'){
+                       alert('---rcms 异常请稍后再试---')
+                        console.log(result.code)
+                   }else{
+
+                        if (result.channels.length == 0){
+                            $('#c_box').empty()
+                            alert('当前用户，已无频道可配置')
+                            return false
+                        }
+
+                        $('#c_box').empty()
+                        var c_box = $('#c_box')[0]
+                        var table = document.createElement("table")
+                        var row = table.insertRow()
+
+                        $.each(result.channels,function(i){
+                            if (i > 0 && i% 3 == 0){
+                                row = table.insertRow()
+                            }
+                            var cell = row.insertCell()
+                            cell.width = "40%"
+
+                            var checkBox=document.createElement("input")
+                            checkBox.setAttribute("type","checkbox")
+                            checkBox.setAttribute("name", result.channels[i])
+                            checkBox.setAttribute("value", result.channels[i])
+                            var c_s = "<input class='check_channel' type='checkbox' style='vertical-align:middle' name=box_channels" + ' value=' + result.channels[i] + '>' + '<span style="vertical-align:middle">' + result.channels[i] +'</span></input>'
+                            cell.innerHTML = c_s
+                            c_box.appendChild(table)
+                        })
+
+                        btn_1 = document.createElement("input")
+                        btn_1.setAttribute("type","button")
+                        btn_1.setAttribute("onclick","allClick()")
+                        btn_1.setAttribute("value","全选")
+                        c_box.appendChild(btn_1)
+                   }
+
+               },'json').error(function() { $('#c_box').empty();alert("验证异常，请稍后再试") })
+           }
+       }
+
+        function allClick(){
+
+            var res = $('.check_channel').is(':checked')
+            if(res == true){
+                $('.check_channel').removeAttr("checked", true)
+            }else{
+                $('.check_channel').attr("checked", true)
+            }
+
+            }
+		
+    </script>
+
+
+
+{% end %}

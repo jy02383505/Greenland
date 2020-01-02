@@ -1,0 +1,165 @@
+{% extends body.html %}
+{% block body %}
+
+    <div class="text-center">
+        <h3>鉴权配置添加</h3>
+    </div>
+    <div class="container">
+        <form class="form-inline" action="/conf/add" method="post" id="conf_add">
+        <table class="table table-striped">
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">类别:</th>
+                <td style="width:50%">
+                    <select name="category">
+                        <option value='security' selected='selected'>鉴权</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">用户名:</th>
+                <td style="width:50%"><input name='user' type="textarea" onblur="check(this)"></input></td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">频道名:</th>
+                <td style="width:80%">
+                    <div id="c_box"></div>
+                </td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">后缀:</th>
+                <td style="width:50%"><input type="textarea" name="suffix"></input>&nbsp;域名后缀，根据需要填写，不需要为空</td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">IP周期:</th>
+                <td style="width:50%"><input type="textarea" name="cycle"></input>&nbsp;单位:秒(IP周期内,达到不同【IP数量】访问数后，封禁)</td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">IP数量:</th>
+                <td style="width:50%"><input type="textarea" name="num"></input></td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">总访问周期:</th>
+                <td style="width:50%"><input type="textarea" name="visit_cycle"></input>&nbsp;单位:秒(总访问周期内，不区分IP数量的访问次数达到【总访问数量】，封禁)</td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">总访问数量:</th>
+                <td style="width:50%"><input type="textarea" name="visit_num"></input></td>
+            </tr>
+            <tr style="height:50px;">
+                <th style="text-align:right;padding-right:60px;width:50%">named配置板:</th>
+                <td><textarea style="resize:none;width:400px" rows="4" name="named_map"></textarea><div>一行配置一个named规则，形如：<span style="color:OrangeRed;">解析名</span>,locationName,计数周期(秒),限制次数,拒访秒数，以英文逗号分隔。例如：www.fmprc.gov.cn, foreign, 60, 100, 300<br>
+                www.fmprc.gov.cn, default, 90, 1000, 120<br>
+                # 即针对<span style="color:OrangeRed;">解析名</span>为www.fmprc.gov.cn，locationName为"foreign"的设备组，配置：1分钟内频次100封禁5分钟；而针对<span style="color:OrangeRed;">解析名</span>为www.fmprc.gov.cn，locationName为"default"的设备组，配置：90秒内频次1000封禁2分钟</div></td>
+            </tr>
+            <tr style="height:50px;">
+                <th style="text-align:right;padding-right:60px;width:50%">多规则配置板:</th>
+                <td><textarea style="resize:none;" rows="4" name="rules_map" placeholder=""></textarea><div>一行配置一个规则，形如：规则名称,计数周期(秒),限制次数,拒访秒数，以英文逗号分隔。例如：encrypt, 60, 100, 120 # 即规则encrypt，1分钟内频次100封禁2分钟</div></td>
+            </tr>
+
+            {#
+            <tr style="height:50px;">
+                <th style="text-align:right;padding-right:60px;width:50%">白名单列表:</th>
+                <td><textarea style="resize:none;" rows="4" name="whiteList" placeholder=""></textarea><div>一行配置一个IP</div></td>
+            </tr>
+            #}
+
+        <!--
+        <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">缓存失效时间:</th>
+                <td style="width:50%"><input type="textarea" name="cache_invalid_time"></input>&nbsp;单位:秒(如果是百事通用户正常填写，否则请填写0)</td>
+            </tr>
+        -->
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">解封时间:</th>
+                <td style="width:50%"><input type="textarea" name="add_query_time"></input>&nbsp;单位:秒(默认与IP周期配置相等，增量黑名单的有效时间)</td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">全量查询时间:</th>
+                <td style="width:50%"><input type="textarea" name="all_query_time"></input>&nbsp;单位:秒(全量黑名单的有效时间)</td>
+            </tr>
+            <tr>
+                <td style="text-align:right;padding-right:60px;width:50%">
+                    &nbsp;
+                </td>
+                <td style="width:50%">
+                    <button type="submit" class="btn btn-primary" onsubmit="return validate_form(this)" >保存</button>
+                </td>
+            </tr>
+        </table>
+        </form>
+
+    <script type="text/javascript">
+
+        function trim(s){
+            return s.replace(/(^\s*)|(\s*$)/g, "");
+        }
+
+        function check(t){
+            last_value = trim(t.value)
+            if(last_value==''){
+                console.log('no value')
+            }else{
+                $.post("/check/user/rcms",{user:last_value},function(result){
+                    if(result.code == '1'){
+                        alert('---用户名错误or用户名下无任务频道---')
+                    }else if(result.code == '2'){
+                        alert('---rcms 异常请稍后再试---')
+                        console.log(result.code)
+                    }else{
+
+                        if (result.channels.length == 0){
+                            $('#c_box').empty()
+                            alert('当前用户，已无频道可配置')
+                            return false
+                        }
+
+                        $('#c_box').empty()
+                        var c_box = $('#c_box')[0]
+                        var table = document.createElement("table")
+                        var row = table.insertRow()
+
+                        $.each(result.channels,function(i){
+                            if (i > 0 && i% 3 == 0){
+                                row = table.insertRow()
+                            }
+                            var cell = row.insertCell()
+                            cell.width = "40%"
+
+                            var checkBox=document.createElement("input")
+                            checkBox.setAttribute("type","checkbox")
+                            checkBox.setAttribute("name", result.channels[i])
+                            checkBox.setAttribute("value", result.channels[i])
+                            var c_s = "<input class='check_channel' type='checkbox' style='vertical-align:middle' name=box_channels" + ' value=' + result.channels[i] + '>' + '<span style="vertical-align:middle">' + result.channels[i] +'</span></input>'
+                            cell.innerHTML = c_s
+                            c_box.appendChild(table)
+                        })
+
+                        btn_1 = document.createElement("input")
+                        btn_1.setAttribute("type","button")
+                        btn_1.setAttribute("onclick","allClick()")
+                        btn_1.setAttribute("value","全选")
+                        c_box.appendChild(btn_1)
+                   }
+
+                },'json').error(function() { $('#c_box').empty();alert("验证异常，请稍后再试") })
+            }
+        }
+
+        function allClick(){
+
+            var res = $('.check_channel').is(':checked')
+
+            if(res == true){
+                $('.check_channel').removeAttr("checked", true)
+            }else{
+                $('.check_channel').attr("checked", true)
+            }
+
+        }
+
+
+    </script>
+
+
+
+{% end %}

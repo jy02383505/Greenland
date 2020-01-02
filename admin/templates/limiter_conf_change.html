@@ -1,0 +1,203 @@
+{% extends body.html %}
+{% block body %}
+
+    <div class="text-center">
+        <h3>配置修改</h3>
+    </div>
+    <div class="container">
+		
+		<div id="myModal1_c" class="modal hide fade" tabindex="-1" data-width="760">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+					<h3>自定义方向表单</h3>
+			</div>
+			<div class="modal-body">
+				<div class="row-fluid">
+					<div class="span6">
+						<h4>边缘设备带宽方向说明</h4>
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img alt src="{{ static_url('img/edge_devs.jpg') }}" />
+							<div class="control-group">
+								<div class="controls">
+									&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" value="e1" name='direction_c' />  1
+									<input type="checkbox" value="e2" name="direction_c" />  2
+									<input type="checkbox" value="e3" name="direction_c" />  3
+									<input type="checkbox" value="e4" checked="checked" name="direction_c" />  4(默认选择)
+								</div>
+							</div>						
+					</div>
+					<div class="span6">
+						<h4>上层设备带宽方向说明</h4>
+						<div class="control-group">
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img alt src="{{ static_url('img/upper_devs.jpg') }}" />
+							<div class="controls">
+								&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" value="in" name="direction_c" />  in
+								<input type="checkbox" value="out" name="direction_c" />  out
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" data-dismiss="modal" class="btn">关闭</button>
+					<button type="button" data-dismiss="modal"  class="btn btn-primary" id="put_directions_c" >提交</button>
+				</div>
+			</div>
+		</div>
+
+
+        <form class="form-inline" action="/limiter_conf/exec" method="post" id="limiter_conf_add">
+		<input type="hidden" name="hidden_direction_c" id ="hidden_direction_c" value={{ conf['category_old']}}></input>
+        <input type="hidden" name="conf_id" value={{conf['_id']}}></input>
+        <input type="hidden" name="old_category" value={{conf['category_old']}}></input>
+        <input type="hidden" name="old_channels" value={{','.join(conf['channels'])}}></input>
+        <table class="table table-striped">
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">计费模式:</th>
+					<td style="width:50%"><input type="textarea" placeholder="请在右侧选择方向" id="input_direction_c" value={{ conf['category']}}></input>
+						<input type="button" class="btn btn-success" id="fourth_direction_c" value="边缘4反向"></input>
+						<input type="button" class="btn btn-success" id="four_direction_c" value="边缘4个方向"></input>
+						<input type="button" class="btn btn-success" id="eight_direction_c" value="全部方向"></input>
+						<a href="#myModal1_c" role="button" class="btn btn-primary" data-toggle="modal">自定义</a>
+					</td>
+                </td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">用户名:</th>
+                <td style="width:50%">{{ conf['user']}}</td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">频道名:</th>
+                <td>
+                    <table class="table table-striped">
+                        {% for n ,c in enumerate(all_channel) %}
+                            {% if n%4 == 0 %}
+                            <tr>
+                            {% end %}
+                                <td>
+                                    <input type="checkbox" name="box_channels" value={{c}} {% if c in conf['channels'] %}checked=true{%end%}>
+                                    {{ c }}
+                                </td>
+                            {% if n != 0 and (n-3)%4 == 0 %}
+                            </tr>
+                            {% end %}
+                        {% end %}
+                    </table>
+                </td>
+            </tr>
+                <th style="text-align:right;padding-right:60px;width:50%">数量:</th>
+                <td style="width:50%"><input type="textarea" name="rate" value={{conf['rate']/1024}}></input>&nbsp;单位:Gb(0~500)</td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%"><font size="4" >&nbsp;&nbsp;&nbsp;参数设置</font></th>
+                <td style="width:50%"></td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">限速基数值Bbase:</th>
+                <td style="width:50%"><input type="textarea" id="bbase" name="bbase" value={{ conf['Bbase']}}></input> 单位:kb/s</td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">警戒值Balarm参数:</th>
+                <td style="width:50%"><input type="textarea" id="balarm" name="balarm" value={{ conf['Balarm']}}></input></td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">阈值Bhard参数:</th>
+                <td style="width:50%"><input type="textarea" id="bhard" name="bhard" value={{ conf['Bhard']}}></input></td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">梯度值Bgrade:</th>
+                <td style="width:50%">
+                    <select name="bgrade" id="bgrade">
+                        <option value='1'>1</option>
+                        <option value='2'>2</option>
+                        <option value='3'>3</option>
+                        <option value='4'>4</option>
+                        <option value='5'>5</option>
+                        <option value='6'>6</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">报警值Bpolice参数:</th>
+                <td style="width:50%"><input type="textarea" id="bpolice" name="bpolice" value={{ conf['Bpolice']}}></input></td>
+            </tr>
+            <tr>
+                <td style="text-align:right;padding-right:60px;width:50%">
+                    &nbsp;
+                </td>
+                <td style="width:50%">
+                    <button type="submit" class="btn btn-primary" onsubmit="" >修改</button>
+                </td>
+            </tr>
+        </table>
+        </form>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#bgrade").val({{ conf['Bgrade'] }});
+        });
+			$("#put_directions_c").click(function(){
+			var all_direction = "";
+			$('input[name="direction_c"]:checked').each(function(){ 
+				all_direction = all_direction + $(this).val()+','; 
+			});
+			if(all_direction.length>0){
+				all_direction=all_direction.substring(0,all_direction.length-1)
+				$("#hidden_direction_c").val(all_direction);
+				directions_result = select_directions(all_direction);
+				$("#input_direction_c").val(directions_result);
+			}else{
+				alert("您没有选择任何方向，请重新选择!");
+			}
+		});
+	   function select_directions(all_direction){
+			all_directions = all_direction.split(",");
+			var str1="边缘";
+			var str2="上层";
+			var flag="00";
+			for(i=0;i<all_directions.length;i++){
+				if(	all_directions[i].substring(0,1)=='e'){
+					str1 = str1+all_directions[i].substring(1,2)+",";
+					if(flag=="01" || flag=='11'){
+						flag="11";
+					}else{
+						flag1="10";
+					}
+				}else if(all_directions[i]=='in'){
+					str2 = str2+all_directions[i]+",";
+					if(flag=="10" || flag=='11'){
+                        flag="11";
+                    }else{
+                        flag1="01";
+                    }
+				}else{
+					str2 = str2+all_directions[i]+",";
+                    if(flag=="10" || flag=='11'){
+                        flag="11";
+                    }else{
+                        flag1="01";
+                    }
+				}
+			}
+			if(flag1=="10"){
+				return str1.substring(0,str1.length-1);
+			}else if(flag=="01"){
+				return str2.substring(0,str1.length-1);
+			}else{
+				return str1.substring(0,str1.length-1)+"方向,"+str2.substring(0,str2.length-1)+"方向"
+			}
+		}
+	   $("#fourth_direction_c").click(function(){
+			$("#input_direction_c").val("边缘4方向");
+			$("#hidden_direction_c").val("e4");
+       });
+	   $("#four_direction_c").click(function(){
+			$("#input_direction_c").val("边缘4个方向");
+			$("#hidden_direction_c").val("e1,e2,e3,e4");
+       });
+	   $("#eight_direction_c").click(function(){
+			$("#input_direction_c").val("全部方向");
+			$("#hidden_direction_c").val("e1,e2,e3,e4,in,out");
+       });
+    </script>
+
+
+{% end %}

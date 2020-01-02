@@ -1,0 +1,94 @@
+{% extends body.html %}
+{% block body %}
+
+    <div class="text-center">
+        <h3>配置修改</h3>
+    </div>
+    <div class="container">
+        <form class="form-inline" action="/conf/exec" method="post" id="conf_add">
+        <input type="hidden" name="conf_id" value={{conf['_id']}}></input>
+        <table class="table table-striped">
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">类别:</th>
+                <td style="width:50%">
+                         {% if conf['category'] == 'security' %}
+                鉴权
+                         {%end%}
+                         {% if conf['category'] == 'speed' %}
+                            限速
+                         {%end%}
+                </td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">用户名:</th>
+                <td style="width:50%">{{ conf['user']}}</td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">频道名:</th>
+                <td style="width:50%">{{ conf['channel']}}</td>
+            </tr>
+             <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">后缀:</th>
+                <td style="width:50%">{{ conf['suffix'] if conf.get('suffix') else ''}}</td>
+            </tr>
+{#            <tr>#}
+{#                <th style="text-align:right;padding-right:60px;width:50%">后缀:</th>#}
+{#                <td style="width:50%"><input type="textarea" name="suffix" value={{conf['suffix']}}></input></td>#}
+{#            </tr>#}
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">IP周期:</th>
+                <td style="width:50%"><input type="textarea" name="cycle" value={{conf['cycle']}}></input>&nbsp;单位:秒(IP周期内,达到不同【IP数量】访问数后，封禁)</td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">IP数量:</th>
+                <td style="width:50%"><input type="textarea" name="num" value={{conf['num']}}></input></td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">总访问周期:</th>
+                <td style="width:50%"><input type="textarea" name="visit_cycle" value={{conf['visit_cycle']}}></input>&nbsp;单位:秒(总访问周期内，不区分IP数量的访问次数达到【总访问数量】，封禁)</td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">总访问数量:</th>
+                <td style="width:50%"><input type="textarea" name="visit_num" value={{conf['visit_num']}}></input></td>
+            </tr>
+            <tr style="height:50px;">
+                <th style="text-align:right;padding-right:60px;width:50%">named配置板:</th>
+                <td><textarea style="resize:none;width:400px;" rows="4" name="named_map">{{conf['named_map_str']}}</textarea><div>一行配置一个named规则，形如：<span style="color:OrangeRed;">解析名</span>,locationName,计数周期(秒),限制次数,拒访秒数，以英文逗号分隔。例如：www.fmprc.gov.cn, foreign, 60, 100, 300<br>
+                www.fmprc.gov.cn, default, 90, 1000, 120<br>
+                # 即针对<span style="color:OrangeRed;">解析名</span>为www.fmprc.gov.cn，locationName为"foreign"的设备组，配置：1分钟内频次100封禁5分钟；而针对<span style="color:OrangeRed;">解析名</span>为www.fmprc.gov.cn，locationName为"default"的设备组，配置：90秒内频次1000封禁2分钟</div></td>
+            </tr>
+            <tr style="height:50px;">
+                <th style="text-align:right;padding-right:60px;width:50%">多规则配置板:</th>
+                <td><textarea style="resize:none;" rows="4" name="rules_map" placeholder="">{{conf['rules_map_str']}}</textarea><div>一行配置一个规则，形如：规则名称,计数周期(秒),限制次数,拒访秒数，以英文逗号分隔。例如：encrypt, 60, 100, 120 # 即规则encrypt，1分钟内频次100封禁2分钟</div></td>
+            </tr>
+        <!--
+        <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">缓存失效时间:</th>
+                <td style="width:50%"><input type="textarea" name="cache_invalid_time" value={{conf['cache_invalid_time']}}></input></td>
+            </tr>
+        -->
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">解封时间:</th>
+                <td style="width:50%"><input type="textarea" name="add_query_time" value={{conf['add_query_time'] if conf.get('add_query_time') else 0}}></input>&nbsp;(默认与IP周期配置相等，增量黑名单的有效时间)</td>
+            </tr>
+            <tr>
+                <th style="text-align:right;padding-right:60px;width:50%">全量查询时间:</th>
+                <td style="width:50%"><input type="textarea" name="all_query_time" value={{conf['all_query_time'] if conf.get('all_query_time') else 0}}></input>&nbsp;单位:秒(全量黑名单的有效时间)</td>
+            </tr>
+            <tr>
+                <td style="text-align:right;padding-right:60px;width:50%">
+                    &nbsp;
+                </td>
+                <td style="width:50%">
+                    <button type="submit" class="btn btn-primary" onsubmit="" >修改</button>
+                </td>
+            </tr>
+        </table>
+        </form>
+
+    <script type="text/javascript">
+    </script>
+
+
+
+{% end %}

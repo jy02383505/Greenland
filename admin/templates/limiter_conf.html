@@ -1,0 +1,81 @@
+{% extends body.html %}
+{% block body %}
+
+    <div class="text-center">
+         <h3>限速配置一览</h2>
+         <form class="form-inline" action="/limiter_conf" method="post" id="queryForm">
+            <input type="text" placeholder="用户名" name="query_id", value={{query_id}} >
+
+            <button type="submit" class="btn btn-primary ">查询</button>
+        </form>
+    </div>
+
+        <div class="container">
+              <h1></h1>
+              <table class="table table-striped">
+                  <tr>
+                      <th style="width: 200px;"><center>用户名</center></th>
+                      <th style="width: 200px;"><center>包含频道</center></th>
+                      <th style="width: 200px;" ><center>限速类别</center></th>
+                      <th style="width: 200px;" ><center>数量(Gb)</center></th>
+                      <th style="width: 200px;" ><center>限速基数值(kb/s)</center></th>
+                      <th style="width: 200px;" ><center>警戒值参数</center></th>
+                      <th style="width: 200px;" ><center>阈值参数</center></th>
+                      <th style="width: 200px;" ><center>梯度值</center></th>
+					  <th style="width: 200px;" ><center>报警值</center></th>
+                      <th style="width: 200px;"><center>更改配置</center></th>
+                      <th style="width: 200px;"><center>删除配置</center></th>
+                   </tr>
+                    {% for conf in all_conf %}
+                    <tr>
+                      <td><center>{{conf['user']}}</center> </td>
+                      <td><center> {% raw  '<br>'.join(conf['channels']) %}</center> </td>
+                      <td>
+                          <center>
+								{{conf['category']}}
+                          </center>
+                      </td>
+                      <td><center>{{conf['rate']/1024}}</center> </td>
+                      <td><center>{{conf.get('Bbase', 0)}}</center> </td>
+                      <td><center>{{conf.get('Balarm', 0)}}</center> </td>
+                      <td><center>{{conf.get('Bhard', 0)}}</center> </td>
+                      <td><center>{{conf.get('Bgrade',0)}}</center> </td>
+                      <td><center>{{conf.get('Bpolice', 0)}}</center> </td>
+                      <td><center><a class="btn btn-info" href="/limiter_conf/change/{{conf['_id']}}" rel="rewrite">更改</a></center> </td>
+                      <td><center><a class="btn btn-info" href="/limiter_conf/del/{{conf['_id']}}" rel="rewrite">删除</a></center> </td>
+                    </tr>                  
+                    {% end %}
+              </table>
+        </div>
+
+        {% if totalpage >1 %}
+        <div class="pagination">
+              <ul>
+                  <li class="disabled"><a href="/limiter_conf">&laquo;</a></li>
+                  {%for p in range(totalpage) %}
+                  <li ><a href="javascript:submitFrom({{p}});" {% if c_page == p %} class="btn" {% end %} >{{ p+1 }}</a></li>
+                 {% end %}
+              </ul>
+         </div>
+         {% end %}
+
+
+    <script type="text/javascript">
+       function submitFrom(curpage){
+          var f = document.getElementById("queryForm");
+          var input = document.createElement("input");
+          input.setAttribute("type","hidden");
+          input.setAttribute("value",curpage);
+          input.setAttribute("name","c_page");
+          f.appendChild(input);
+          f.submit();
+        };
+		function get_type(data){
+			alert('1');
+		}
+  </script>
+
+
+
+{% end %}
+
